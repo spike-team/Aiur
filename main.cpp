@@ -6,7 +6,7 @@
 
 using namespace std;
 
-int cnt = 0;
+int cnt = 0, knt = 0;
 
 int getRandomNumber(int min, int max)
 {
@@ -33,35 +33,22 @@ bool createTimeTable(multimap<int, vector<string>> time_table, int full_time, bo
 
 	bool success = false;
 
-	for (int i = 0; i < full_time * 50; i++) {
+	for (int i = 0; i < full_time * 10; i++) {
 		overlap = false;
 
-		if (time_table.size() == 0) {
+		if (time_table.size() == 0)
 			break;
-		}
-
-		/*
-		랜덤 개선 필수
-
-		다른 반에 이미 들어간 것은 제외 해야함.
-		*/
-
+		
 		int number = getRandomNumber(0, time_table.size() - 1);
-		iter = time_table.begin();
+		iter = next(time_table.begin(), number);
 
-		while (number-- && iter != time_table.end())
-			iter++;
-
-		//cout << iter->second.front() << " " << iter->second.back() << " " << iter->first << endl;
-		for (int i = 0; i <= period; i++) {
+		for (int i = 0; i <= period; i++)
 			if (iter->second.front() == stu[i][day])
 				overlap = true;
-		}
 		
-		for (int i = 0; i < grade; i++) {
+		for (int i = 0; i < grade; i++)
 			if (iter->second.back() == teacher[period][day][i])
 				overlap = true;
-		}
 		
 		if (!overlap) {
 			if (!(iter->first > 1 && period + iter->first >= 4 && period <= 3)) {
@@ -84,6 +71,8 @@ bool createTimeTable(multimap<int, vector<string>> time_table, int full_time, bo
 			day++;
 			period = 0;
 		}
+
+		knt++;
 	}
 
 	if (time_table.size() == 0) {
@@ -155,7 +144,7 @@ int main() {
 		}
 	}
 	*/
-	cout << cnt << endl;
+	cout << knt << " " << cnt << endl;
 
 	return 0;
 }
@@ -191,6 +180,10 @@ int main() {
 문학 장보현 1
 
 FULL_TIME 28
+
+7 7 7 7 6
+
+4반
 */
 
 /*
@@ -220,4 +213,8 @@ FULL_TIME 28
 체육 우연 1
 
 FULL_TIME 24
+
+7 7 7 7 4
+
+5반
 */
