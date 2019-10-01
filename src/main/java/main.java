@@ -1,15 +1,17 @@
-import java.util.Scanner;
-import java.util.Iterator;
-import java.util.Vector;
-import java.util.Random;
+import java.util.*;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 
 public class main {
     public static void main(String[] args) throws AssertionError {
         Scanner sc = new Scanner(System.in);
         int cnt = 0, knt = 0;
 
-        Multimap<Vector<String>, Integer> time_table = null;
+        Multimap<Vector<String>, Integer> time_table = ArrayListMultimap.create();
+
         Vector<String> tea = new Vector<>();
         Vector<Integer> dy = new Vector<Integer>(); // = { 0, 0, 0, 0, 0 }; // 알고리즘 제작 시작 교시
         Vector<Integer> arr = new Vector<>(); // = { 7, 7, 7, 7, 6 }; // 월, 화, 수, 목, 금 각각 총 교시
@@ -38,20 +40,21 @@ public class main {
             tea.addElement(subject);
             tea.addElement(name);
 
-            if (time_table != null) {
-                time_table.put(tea, time);
-            }
-
+            //System.out.printf("%s, %s\n", tea.get(0), tea.get(1));
+            time_table.put(tea , time);
+            //System.out.println(time_table.size());
             tea.clear();
         }
 
         System.out.println();
 
+        System.out.println(time_table);
+
         //student.addElement("", new Vector<Vector<String>>(5, new Vector<String> (4)));
         //student.assign(10, Vector < Vector < String >> (5, Vector < String > (4, ""))); // 10교시, 5일, 4반
         //teacher.assign(10, Vector < Vector < String >> (5, Vector < String > (4, ""))); // 10교시, 5일, 4반
 
-        studentable set_table = new studentable();
+        student_table set_table = new student_table();
 
         Integer grade = 0;
         while (grade != 4) { // 반 갯수
@@ -75,30 +78,28 @@ public class main {
     }
 }
 
-class studentable {
+class student_table {
     private Integer cnt = 0;
     private Integer knt = 0;
 
     public boolean createTimeTable(Multimap<Vector<String>, Integer> time_table, Integer full_time, boolean overlap, Integer period, Integer day, Vector<Vector<Vector<String>>> student, Vector<Vector<Vector<String>>> teacher, Vector<Integer> arr, Integer grade) {
-        Vector<Vector<String>> stu = new Vector<>(), tea = new Vector<>();
+        Vector<String> fir = new Vector<>(5);
+        Vector<Vector<String>> stu = new Vector<>(10), tea = new Vector<>(10);
 
         Integer n = 0, pc = 0;
         Integer pre_num = 0;
 
-        stu.clear();
-        //stu.assign(10, vector < string > (5, ""));
-
-        tea.clear();
-        //tea.assign(10, vector < string > (5, ""));
+        fir.setSize(5);
+        fir.add(5, "");
 
         boolean success = false;
 
         overlap = false;
 
         for (Integer i = 0; i < full_time * 50; i++) {
-            //if (time_table.isEmpty()) {
-            //   break;
-            //}
+            if (time_table.isEmpty()) {
+               break;
+            }
 
             knt++;
             pc++;
@@ -123,48 +124,50 @@ class studentable {
 
             Random random = new Random();
 
-            System.out.printf("%d", time_table.size());
+            //System.out.printf("%d", time_table.size());
             int number = random.nextInt(time_table.size());
             //int number = getRandomNumber(0, time_table.size() - 1);
 
             Iterator<Vector<String>> iter1;
             Iterator<Integer> iter2;
-            iter1 = time_table.keySet().iterator();
+            iter1 = time_table.keys().iterator();
             iter2 = time_table.values().iterator();
 
-            while (number-- > 0) {
+            while (number > 0) {
                 if (iter1.hasNext() || iter2.hasNext()) {
                     iter1.next();
                     iter2.next();
                 }
+
+                number--;
             }
 
-            Vector<String> iter_first = iter1.next();
+            Vector<String> iter_first = (Vector<String>) iter1.next();
             Integer iter_second = iter2.next();
 
-            for (int k = 0; k <= period; k++) {
-                int finalK = k;
-                Integer finalDay = day;
-                if (iter_first.firstElement() == stu.elementAt(finalK).elementAt(finalDay)) {
-                    overlap = true;
+            if (period != 0 && day != 0) {
+                for (int k = 0; k <= period; k++) {
+                    if (iter_first.firstElement().equals(stu.elementAt(k).elementAt(day))) {
+                        overlap = true;
+                    }
                 }
-            }
 
-            for (int l = 0; l < grade; l++) {
-                if (iter_first.lastElement() == teacher.elementAt(period).elementAt(day).elementAt(l)) {
-                    overlap = true;
+                for (int l = 0; l < grade; l++) {
+                    if (iter_first.lastElement().equals(teacher.elementAt(period).elementAt(day).elementAt(l))) {
+                        overlap = true;
+                    }
                 }
             }
 
             if (!overlap) {
-                if (!(iter_second.intValue() > 1 && period + iter_second.intValue() > 4 && period <= 3)) {
-                    if (!(period + iter_second.intValue() > arr.elementAt(day))) {
-                        for (int m = 0; m < iter_second.intValue(); m++) {
+                if (!(iter_second > 1 && period + iter_second > 4 && period <= 3)) {
+                    if (!(period + iter_second > arr.elementAt(day))) {
+                        for (int m = 0; m < iter_second; m++) {
                             //stu.elementAt(period).elementAt(day) = iter_first.firstElement();
                             //tea.elementAt(period).elementAt(day) = iter_first.lastElement();
-
-                            stu.elementAt(period).elementAt(day).concat(iter_first.firstElement());
                             tea.elementAt(period).elementAt(day).concat(iter_first.lastElement());
+                            stu.elementAt(period).elementAt(day).concat(iter_first.firstElement());
+
 
                             period++;
                         }
@@ -210,3 +213,36 @@ class studentable {
         return knt;
     }
 }
+
+/*
+창체 안현수 1
+창체 임채홍 2
+창체 안현수 1
+디비 안현수 2
+디비 안현수 1
+확통 설은선 1
+확통 설은선 1
+확통 설은선 1
+체육 장필준 1
+체육 장필준 1
+국사 서현철 1
+국사 서현철 1
+국사 서현철 1
+자바 신요셉 3
+자바 신요셉 2
+자바 신요셉 1
+논술 강래형 1
+논술 강래형 1
+네트 이경희 2
+네트 이경희 1
+영어 임채홍 1
+영어 임채홍 1
+영어 임채홍 1
+미술 강래형 1
+미술 강래형 1
+문학 장보현 1
+문학 장보현 1
+문학 장보현 1
+
+{ FULL_TIME 28, 7 7 7 7 6, 4반 }
+*/
