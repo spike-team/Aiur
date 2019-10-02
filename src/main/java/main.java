@@ -1,16 +1,13 @@
 import java.util.*;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
+import com.google.common.collect.*;
 
 public class main {
     public static void main(String[] args) throws AssertionError {
         Scanner sc = new Scanner(System.in);
         int cnt = 0, knt = 0;
 
-        Multimap<Vector<String>, Integer> time_table = ArrayListMultimap.create();
+        Multimap<Integer, Table> time_table = ArrayListMultimap.create();
 
         Vector<String> tea = new Vector<>();
         Vector<Integer> dy = new Vector<Integer>(); // = { 0, 0, 0, 0, 0 }; // 알고리즘 제작 시작 교시
@@ -26,7 +23,6 @@ public class main {
         }
 
         Vector<Vector<Vector<String>>> student = new Vector<Vector<Vector<String>>>();
-        //student.addElement("", new Vector<Vector<String>>(5, Vector<String>(4, "")));
         Vector<Vector<Vector<String>>> teacher = new Vector<Vector<Vector<String>>>();
         String subject, name;
         Integer time, full_time = 28, day = 0, period = 0;
@@ -40,19 +36,12 @@ public class main {
             tea.addElement(subject);
             tea.addElement(name);
 
-            //System.out.printf("%s, %s\n", tea.get(0), tea.get(1));
-            time_table.put(tea , time);
-            //System.out.println(time_table.size());
+            time_table.put(i , new Table(tea, time));
             tea.clear();
         }
 
         System.out.println();
-
-        System.out.println(time_table);
-
-        //student.addElement("", new Vector<Vector<String>>(5, new Vector<String> (4)));
-        //student.assign(10, Vector < Vector < String >> (5, Vector < String > (4, ""))); // 10교시, 5일, 4반
-        //teacher.assign(10, Vector < Vector < String >> (5, Vector < String > (4, ""))); // 10교시, 5일, 4반
+        //System.out.println(time_table);
 
         student_table set_table = new student_table();
 
@@ -78,20 +67,30 @@ public class main {
     }
 }
 
+class Table {
+    Vector<String> cource;
+    Integer time;
+
+    Table () {
+        cource = new Vector<>();
+        time = 0;
+    }
+
+    Table (Vector<String> cur, Integer tm) {
+        cource = cur;
+        time = tm;
+    }
+}
+
 class student_table {
     private Integer cnt = 0;
     private Integer knt = 0;
 
-    public boolean createTimeTable(Multimap<Vector<String>, Integer> time_table, Integer full_time, boolean overlap, Integer period, Integer day, Vector<Vector<Vector<String>>> student, Vector<Vector<Vector<String>>> teacher, Vector<Integer> arr, Integer grade) {
-        Vector<String> fir = new Vector<>(5);
-        Vector<Vector<String>> stu = new Vector<>(10), tea = new Vector<>(10);
+    public boolean createTimeTable(Multimap<Integer, Table> time_table, Integer full_time, boolean overlap, Integer period, Integer day, Vector<Vector<Vector<String>>> student, Vector<Vector<Vector<String>>> teacher, Vector<Integer> arr, Integer grade) {
+        Vector<Vector<String>> stu = new Vector<>(), tea = new Vector<>();
 
         Integer n = 0, pc = 0;
         Integer pre_num = 0;
-
-        fir.setSize(5);
-        fir.add(5, "");
-
         boolean success = false;
 
         overlap = false;
@@ -105,16 +104,14 @@ class student_table {
             pc++;
 
             if (pc > full_time) {
-                Iterator<Vector<String>> it = time_table.keySet().iterator();
+                Iterator<Table> it = time_table.values().iterator();
 
-                while (it.hasNext()){
-                    Vector<String> s;
-
+                while (it.hasNext()) {
                     if (it.hasNext()) {
-                        s = it.next();
+                        Table table = it.next();
 
                         for (Integer j = 0; j <= period; j++) {
-                            if (s.firstElement() != stu.elementAt(j).elementAt(day) && s.lastElement() != tea.elementAt(j).elementAt(day)) {
+                            if (table.cource.firstElement() != stu.elementAt(j).elementAt(day) && table.cource.lastElement() != tea.elementAt(j).elementAt(day)) {
                                 overlap = true;
                             }
                         }
@@ -124,55 +121,59 @@ class student_table {
 
             Random random = new Random();
 
-            //System.out.printf("%d", time_table.size());
             int number = random.nextInt(time_table.size());
-            //int number = getRandomNumber(0, time_table.size() - 1);
 
-            Iterator<Vector<String>> iter1;
-            Iterator<Integer> iter2;
-            iter1 = time_table.keys().iterator();
-            iter2 = time_table.values().iterator();
+            Iterator<Integer> iter_key;
+            Iterator<Table> iter;
+
+            iter_key = time_table.keys().iterator();
+            iter = time_table.values().iterator();
+
+            Integer key = 0;
+            Table table = new Table();
 
             while (number > 0) {
-                if (iter1.hasNext() || iter2.hasNext()) {
-                    iter1.next();
-                    iter2.next();
+                if (iter.hasNext() || iter.hasNext()) {
+                    key = iter_key.next();
+                    table = iter.next();
                 }
+
+                System.out.println("key : " + key);
+                System.out.print("subject : " + table.cource.firstElement());
+                System.out.print(", name : " + table.cource.lastElement());
+                System.out.print(", time : " + table.time + "\n");
+
 
                 number--;
             }
 
-            Vector<String> iter_first = (Vector<String>) iter1.next();
-            Integer iter_second = iter2.next();
-
             if (period != 0 && day != 0) {
                 for (int k = 0; k <= period; k++) {
-                    if (iter_first.firstElement().equals(stu.elementAt(k).elementAt(day))) {
+                    if (table.cource.firstElement().equals(stu.elementAt(k).elementAt(day))) {
                         overlap = true;
                     }
                 }
 
                 for (int l = 0; l < grade; l++) {
-                    if (iter_first.lastElement().equals(teacher.elementAt(period).elementAt(day).elementAt(l))) {
+                    if (table.cource.lastElement().equals(teacher.elementAt(period).elementAt(day).elementAt(l))) {
                         overlap = true;
                     }
                 }
             }
 
             if (!overlap) {
-                if (!(iter_second > 1 && period + iter_second > 4 && period <= 3)) {
-                    if (!(period + iter_second > arr.elementAt(day))) {
-                        for (int m = 0; m < iter_second; m++) {
+                if (!(table.time > 1 && period + table.time > 4 && period <= 3)) {
+                    if (!(period + table.time > arr.elementAt(day))) {
+                        for (int m = 0; m < table.time; m++) {
                             //stu.elementAt(period).elementAt(day) = iter_first.firstElement();
                             //tea.elementAt(period).elementAt(day) = iter_first.lastElement();
-                            tea.elementAt(period).elementAt(day).concat(iter_first.lastElement());
-                            stu.elementAt(period).elementAt(day).concat(iter_first.firstElement());
-
+                            tea.elementAt(period).elementAt(day).concat(table.cource.lastElement());
+                            stu.elementAt(period).elementAt(day).concat(table.cource.firstElement());
 
                             period++;
                         }
 
-                        time_table.remove(iter1, iter2);
+                        time_table.remove(key, table);
                         pc = 0;
                     }
                 }
