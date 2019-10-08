@@ -9,60 +9,55 @@ public class main {
 
         Multimap<Integer, Table> time_table = ArrayListMultimap.create();
 
-        Vector<String> tea = new Vector<>();
-        Vector<Integer> dy = new Vector<Integer>(); // = { 0, 0, 0, 0, 0 }; // 알고리즘 제작 시작 교시
-        Vector<Integer> arr = new Vector<>(); // = { 7, 7, 7, 7, 6 }; // 월, 화, 수, 목, 금 각각 총 교시
+        int[] dy = {0, 0, 0, 0, 0};
+        int[] arr = {7, 7, 7, 7, 6};
 
-        for (int i = 0; i < 5; i++) {
-            dy.addElement(0);
+        Vector<Vector<Vector<String>>> student = new Vector<>();
+        Vector<Vector<Vector<String>>> teacher = new Vector<>();
 
-            if (i != 4)
-                arr.addElement(7);
-            else
-                arr.addElement(6);
-        }
-
-        Vector<Vector<Vector<String>>> student = new Vector<Vector<Vector<String>>>();
-        Vector<Vector<Vector<String>>> teacher = new Vector<Vector<Vector<String>>>();
         String subject, name;
         Integer time, full_time = 28, day = 0, period = 0;
-        boolean overlap = false;
+
+        Vector<Vector<String>> tea = new Vector<Vector<String>>(28);
+
+        //tea.add(2, new Vector<>(Collections.singleton("")));
 
         for (int i = 0; i < full_time; i++) {
+            Vector<String> sub = new Vector<>();
+
             subject = sc.next();
             name = sc.next();
             time = sc.nextInt();
 
-            tea.addElement(subject);
-            tea.addElement(name);
+            sub.add(subject);
+            sub.add(name);
 
-            time_table.put(i , new Table(tea, time));
-            tea.clear();
+            tea.add(sub);
+
+            time_table.put(i, new Table(tea.elementAt(i), time));
         }
 
         System.out.println();
-        //System.out.println(time_table);
 
         student_table set_table = new student_table();
 
         Integer grade = 0;
-        while (grade != 4) { // 반 갯수
-            if (!set_table.createTimeTable(time_table, full_time, overlap, period, day, student, teacher, arr, grade)) {
+        while (grade < 1) {
+            if
+            (!set_table.createTimeTable(time_table, full_time, period, day, student, teacher, arr, grade)) {
                 grade++;
             }
         }
-
-        // 과목 출력
+        /*
         for (int k = 0; k < grade; k++) {
             for (int i = 0; i < student.size(); i++) {
                 for (int j = 0; j < student.elementAt(i).size(); j++) {
                     System.out.printf("%s", student.elementAt(i).elementAt(j).elementAt(k));
-                    //cout << student[i][j][k] << " ";
                 }
                 System.out.println();
             }
         }
-
+        */
         System.out.println(knt + " " + cnt);
     }
 }
@@ -71,12 +66,12 @@ class Table {
     Vector<String> cource;
     Integer time;
 
-    Table () {
+    Table() {
         cource = new Vector<>();
         time = 0;
     }
 
-    Table (Vector<String> cur, Integer tm) {
+    Table(Vector<String> cur, Integer tm) {
         cource = cur;
         time = tm;
     }
@@ -86,33 +81,39 @@ class student_table {
     private Integer cnt = 0;
     private Integer knt = 0;
 
-    public boolean createTimeTable(Multimap<Integer, Table> time_table, Integer full_time, boolean overlap, Integer period, Integer day, Vector<Vector<Vector<String>>> student, Vector<Vector<Vector<String>>> teacher, Vector<Integer> arr, Integer grade) {
-        Vector<Vector<String>> stu = new Vector<>(), tea = new Vector<>();
+    public boolean createTimeTable(Multimap<Integer, Table> time_table, Integer full_time, Integer periot, Integer dat, Vector<Vector<Vector<String>>> student, Vector<Vector<Vector<String>>> teacher, int[] arr, Integer grade) {
+        Multimap<Integer, Table> time_table_copy = time_table;
+
+        String[][] stu = new String[10][5];
+        String[][] tea = new String[10][5];
+
+        Integer day = dat;
+        Integer period = periot;
 
         Integer n = 0, pc = 0;
         Integer pre_num = 0;
         boolean success = false;
-
-        overlap = false;
+        boolean overlap = false;
 
         for (Integer i = 0; i < full_time * 50; i++) {
-            if (time_table.isEmpty()) {
-               break;
+            if (time_table_copy.isEmpty()) {
+                break;
             }
 
             knt++;
             pc++;
 
             if (pc > full_time) {
-                Iterator<Table> it = time_table.values().iterator();
+                Iterator<Table> it = time_table_copy.values().iterator();
 
                 while (it.hasNext()) {
                     if (it.hasNext()) {
                         Table table = it.next();
 
                         for (Integer j = 0; j <= period; j++) {
-                            if (table.cource.firstElement() != stu.elementAt(j).elementAt(day) && table.cource.lastElement() != tea.elementAt(j).elementAt(day)) {
+                            if (table.cource.firstElement() != stu[j][day] && table.cource.lastElement() != tea[j][day]) {
                                 overlap = true;
+                                break;
                             }
                         }
                     }
@@ -126,49 +127,49 @@ class student_table {
             Iterator<Integer> iter_key;
             Iterator<Table> iter;
 
-            iter_key = time_table.keys().iterator();
-            iter = time_table.values().iterator();
+            iter_key = time_table_copy.keys().iterator();
+            iter = time_table_copy.values().iterator();
 
             Integer key = 0;
             Table table = new Table();
 
-            while (number > 0) {
-                if (iter.hasNext() || iter.hasNext()) {
+            while (number >= 0) {
+                if (iter.hasNext() || iter_key.hasNext()) {
                     key = iter_key.next();
                     table = iter.next();
                 }
 
-                System.out.println("key : " + key);
-                System.out.print("subject : " + table.cource.firstElement());
-                System.out.print(", name : " + table.cource.lastElement());
-                System.out.print(", time : " + table.time + "\n");
-
-
                 number--;
             }
 
-            if (period != 0 && day != 0) {
+            if (day != 0 && period != 0) {
                 for (int k = 0; k <= period; k++) {
-                    if (table.cource.firstElement().equals(stu.elementAt(k).elementAt(day))) {
+                    if (table.cource.firstElement().equals(stu[k][day])) {
                         overlap = true;
+                        break;
                     }
                 }
 
                 for (int l = 0; l < grade; l++) {
-                    if (table.cource.lastElement().equals(teacher.elementAt(period).elementAt(day).elementAt(l))) {
+                    if (table.cource.firstElement().equals(teacher.elementAt(period).elementAt(day).elementAt(l))) {
                         overlap = true;
+                        break;
                     }
                 }
             }
 
             if (!overlap) {
                 if (!(table.time > 1 && period + table.time > 4 && period <= 3)) {
-                    if (!(period + table.time > arr.elementAt(day))) {
+                    if (!(period + table.time > arr[day])) {
                         for (int m = 0; m < table.time; m++) {
-                            //stu.elementAt(period).elementAt(day) = iter_first.firstElement();
-                            //tea.elementAt(period).elementAt(day) = iter_first.lastElement();
-                            tea.elementAt(period).elementAt(day).concat(table.cource.lastElement());
-                            stu.elementAt(period).elementAt(day).concat(table.cource.firstElement());
+                            String str1 = table.cource.firstElement();
+                            String str2 = table.cource.lastElement();
+
+                            stu[period][day] = str1;
+                            tea[period][day] = str2;
+
+                            System.out.print(str1 + " ");
+                            System.out.println(str2);
 
                             period++;
                         }
@@ -182,20 +183,34 @@ class student_table {
             //if (stu[period][day] != "")
             //	period++;
 
-            if (period == arr.elementAt(day)) {
+            if (period == arr[day]) {
+                System.out.println("day : " + (day + 1) + "\nperiod : " + period);
+
                 day++;
                 period = 0;
             }
         }
-
-        if (time_table.size() == 0) {
-            for (int i = 0; i < stu.size(); i++) {
-                for (int j = 0; j < stu.elementAt(i).size(); j++) {
-                    if (stu.elementAt(i).elementAt(j).equals(""))
-                        student.elementAt(i).elementAt(j).elementAt(grade).concat(stu.elementAt(i).elementAt(j));
-                    if (tea.elementAt(i).elementAt(j).equals(""))
-                        teacher.elementAt(i).elementAt(j).elementAt(grade).concat(stu.elementAt(i).elementAt(j));
+        /*
+        if (time_table_copy.size() == 0) {
+            for (int i = 0; i < stu.length; i++) {
+                for (int j = 0; j < stu[i].length; j++) {
+                    if (stu[i][j].equals(""))
+                        student.elementAt(i).elementAt(j).elementAt(grade).concat(stu[i][j]); //concat(stu.elementAt(i).elementAt(j));
+                    if (tea[i][j].equals(""))
+                        teacher.elementAt(i).elementAt(j).elementAt(grade).concat(tea[i][j]); //concat(stu.elementAt(i).elementAt(j));
                 }
+            }
+
+            return false;
+        }
+        */
+
+        if (time_table_copy.size() == 0) {
+            for (int i = 0; i < stu.length; i++) {
+                for (int j = 0; j < stu[i].length; j++) {
+                    System.out.print(stu[i][j] + " ");
+                }
+                System.out.println();
             }
 
             return false;
@@ -203,15 +218,8 @@ class student_table {
 
         cnt++;
 
+        System.out.println();
         return true;
-    }
-
-    public Integer getCnt() {
-        return cnt;
-    }
-
-    public Integer getKnt() {
-        return knt;
     }
 }
 
