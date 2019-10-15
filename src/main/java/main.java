@@ -1,6 +1,7 @@
 import java.util.*;
 
 import com.google.common.collect.*;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class main {
     public static void main(String[] args) throws AssertionError {
@@ -58,7 +59,7 @@ public class main {
             }
         }
         */
-        System.out.println(knt + " " + cnt);
+        //System.out.println(knt + " " + cnt);
     }
 }
 
@@ -82,7 +83,17 @@ class student_table {
     private Integer knt = 0;
 
     public boolean createTimeTable(Multimap<Integer, Table> time_table, Integer full_time, Integer periot, Integer dat, Vector<Vector<Vector<String>>> student, Vector<Vector<Vector<String>>> teacher, int[] arr, Integer grade) {
-        Multimap<Integer, Table> time_table_copy = time_table;
+        Multimap<Integer, Table> time_table_copy = ArrayListMultimap.create();
+
+        Iterator<Integer> tableInteger = time_table.keys().iterator();
+        Iterator<Table> tableIterator = time_table.values().iterator();
+
+        while (tableIterator.hasNext() && tableIterator.hasNext()) {
+            Integer k = tableInteger.next();
+            Table v = tableIterator.next();
+
+            time_table_copy.put(k, v);
+        }
 
         String[][] stu = new String[10][5];
         String[][] tea = new String[10][5];
@@ -90,13 +101,11 @@ class student_table {
         Integer day = dat;
         Integer period = periot;
 
-        Integer n = 0, pc = 0;
-        Integer pre_num = 0;
-        boolean success = false;
+        Integer pc = 0;
         boolean overlap = false;
 
         for (Integer i = 0; i < full_time * 50; i++) {
-            if (time_table_copy.isEmpty()) {
+            if (time_table_copy.size() == 0) {
                 break;
             }
 
@@ -170,11 +179,11 @@ class student_table {
 
                             System.out.print(str1 + " ");
                             System.out.println(str2);
-
                             period++;
+
                         }
 
-                        time_table.remove(key, table);
+                        time_table_copy.remove(key, table);
                         pc = 0;
                     }
                 }
@@ -190,22 +199,9 @@ class student_table {
                 period = 0;
             }
         }
-        /*
-        if (time_table_copy.size() == 0) {
-            for (int i = 0; i < stu.length; i++) {
-                for (int j = 0; j < stu[i].length; j++) {
-                    if (stu[i][j].equals(""))
-                        student.elementAt(i).elementAt(j).elementAt(grade).concat(stu[i][j]); //concat(stu.elementAt(i).elementAt(j));
-                    if (tea[i][j].equals(""))
-                        teacher.elementAt(i).elementAt(j).elementAt(grade).concat(tea[i][j]); //concat(stu.elementAt(i).elementAt(j));
-                }
-            }
 
-            return false;
-        }
-        */
-
-        if (time_table_copy.size() == 0) {
+        if (time_table_copy.isEmpty()) {
+            System.out.println("size 0 out!");
             for (int i = 0; i < stu.length; i++) {
                 for (int j = 0; j < stu[i].length; j++) {
                     System.out.print(stu[i][j] + " ");
