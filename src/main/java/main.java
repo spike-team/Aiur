@@ -13,15 +13,10 @@ public class main {
         int[] dy = {0, 0, 0, 0, 0};
         int[] arr = {7, 7, 7, 7, 6};
 
-        Vector<Vector<Vector<String>>> student = new Vector<>();
-        Vector<Vector<Vector<String>>> teacher = new Vector<>();
-
         String subject, name;
         Integer time, full_time = 28, day = 0, period = 0;
 
         Vector<Vector<String>> tea = new Vector<Vector<String>>(28);
-
-        //tea.add(2, new Vector<>(Collections.singleton("")));
 
         for (int i = 0; i < full_time; i++) {
             Vector<String> sub = new Vector<>();
@@ -42,24 +37,29 @@ public class main {
 
         student_table set_table = new student_table();
 
-        Integer grade = 0;
-        while (grade < 1) {
+        Integer grade = 0, ban = 2;
+
+        String[][][] student = new String[10][5][ban];
+        String[][][] teacher = new String[10][5][ban];
+
+        while (grade < ban) {
             if
             (!set_table.createTimeTable(time_table, full_time, period, day, student, teacher, arr, grade)) {
                 grade++;
             }
         }
-        /*
-        for (int k = 0; k < grade; k++) {
-            for (int i = 0; i < student.size(); i++) {
-                for (int j = 0; j < student.elementAt(i).size(); j++) {
-                    System.out.printf("%s", student.elementAt(i).elementAt(j).elementAt(k));
+
+        for (int i = 0; i < grade; i++) {
+            for (int j = 0; j < 10; j++) {
+                for (int k = 0; k < 5; k++) {
+                    System.out.print(student[j][k][i] + " ");
                 }
                 System.out.println();
             }
+            System.out.println();
         }
-        */
-        //System.out.println(knt + " " + cnt);
+
+        System.out.println(set_table.getKnt() + " " + set_table.getCnt());
     }
 }
 
@@ -82,7 +82,7 @@ class student_table {
     private Integer cnt = 0;
     private Integer knt = 0;
 
-    public boolean createTimeTable(Multimap<Integer, Table> time_table, Integer full_time, Integer periot, Integer dat, Vector<Vector<Vector<String>>> student, Vector<Vector<Vector<String>>> teacher, int[] arr, Integer grade) {
+    public boolean createTimeTable(Multimap<Integer, Table> time_table, Integer full_time, Integer periot, Integer dat, String[][][] student, String[][][] teacher, int[] arr, Integer grade) {
         Multimap<Integer, Table> time_table_copy = ArrayListMultimap.create();
 
         Iterator<Integer> tableInteger = time_table.keys().iterator();
@@ -104,6 +104,7 @@ class student_table {
         Integer pc = 0;
         boolean overlap = false;
 
+        one :
         for (Integer i = 0; i < full_time * 50; i++) {
             if (time_table_copy.size() == 0) {
                 break;
@@ -121,8 +122,7 @@ class student_table {
 
                         for (Integer j = 0; j <= period; j++) {
                             if (table.cource.firstElement() != stu[j][day] && table.cource.lastElement() != tea[j][day]) {
-                                overlap = true;
-                                break;
+                                break one;
                             }
                         }
                     }
@@ -151,19 +151,17 @@ class student_table {
                 number--;
             }
 
-            if (day != 0 && period != 0) {
-                for (int k = 0; k <= period; k++) {
-                    if (table.cource.firstElement().equals(stu[k][day])) {
-                        overlap = true;
-                        break;
-                    }
+            for (int k = 0; k <= period; k++) {
+                if (table.cource.firstElement().equals(stu[k][day])) {
+                    overlap = true;
+                    break;
                 }
+            }
 
-                for (int l = 0; l < grade; l++) {
-                    if (table.cource.firstElement().equals(teacher.elementAt(period).elementAt(day).elementAt(l))) {
-                        overlap = true;
-                        break;
-                    }
+            for (int l = 0; l < grade; l++) {
+                if (table.cource.firstElement().equals(teacher[period][day][l])) {
+                    overlap = true;
+                    break;
                 }
             }
 
@@ -177,10 +175,9 @@ class student_table {
                             stu[period][day] = str1;
                             tea[period][day] = str2;
 
-                            System.out.print(str1 + " ");
-                            System.out.println(str2);
+                            //System.out.print(str1 + " ");
+                            //System.out.println(str2);
                             period++;
-
                         }
 
                         time_table_copy.remove(key, table);
@@ -193,8 +190,7 @@ class student_table {
             //	period++;
 
             if (period == arr[day]) {
-                System.out.println("day : " + (day + 1) + "\nperiod : " + period);
-
+                //System.out.println("day : " + (day + 1) + "\nperiod : " + period);
                 day++;
                 period = 0;
             }
@@ -204,18 +200,25 @@ class student_table {
             System.out.println("size 0 out!");
             for (int i = 0; i < stu.length; i++) {
                 for (int j = 0; j < stu[i].length; j++) {
-                    System.out.print(stu[i][j] + " ");
+                    student[i][j][grade] = stu[i][j];
+                    teacher[i][j][grade] = tea[i][j];
                 }
-                System.out.println();
             }
 
             return false;
         }
 
         cnt++;
-
-        System.out.println();
+        //System.out.println();
         return true;
+    }
+
+    public Integer getCnt() {
+        return cnt;
+    }
+
+    public Integer getKnt() {
+        return knt;
     }
 }
 
