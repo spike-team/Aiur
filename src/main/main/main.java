@@ -1,6 +1,8 @@
 import java.text.SimpleDateFormat;
 import java.util.*;
+
 import com.google.common.collect.*;
+
 import java.io.*;
 
 import org.apache.poi.ss.usermodel.CellType;
@@ -68,9 +70,6 @@ public class main {
         }
 
         System.out.println(set_table.getKnt() + " " + set_table.getCnt());
-
-        ExcelParser excelParser = new ExcelParser();
-        excelParser.parsing();
     }
 }
 
@@ -115,7 +114,7 @@ class student_table {
         Integer pc = 0;
         boolean overlap = false;
 
-        one :
+        one:
         for (Integer i = 0; i < full_time * 50; i++) {
             if (time_table_copy.size() == 0) {
                 break;
@@ -232,44 +231,45 @@ class student_table {
 class ExcelParser {
     public static final String projectPath = System.getProperty("user.dir");
 
-    public void parsing() {
+    public void Import() {
         Vector<Table> vector = new Vector<>();
-        String zone = null;//시트명
+        String zone = null;
         Table newData;
 
-        try {
-            File dirFile = new File(projectPath+"\\resources\\");
-            File[] fileList = dirFile.listFiles();
+        File dirFile = new File(projectPath + "\\src\\main\\resources\\");
+        File[] fileList = dirFile.listFiles();
 
-            for(File tempFile : fileList) {
-                if(tempFile.isFile()) {
+        try {
+            for (File tempFile : fileList) {
+                if (tempFile.isFile()) {
                     String fileName = tempFile.getName();
-                    if(!((fileName.endsWith(".xls") || fileName.endsWith(".xlsx")) && fileName.startsWith("Temp"))) {
+
+                    if (!((fileName.endsWith(".xls") || fileName.endsWith(".xlsx")) && fileName.startsWith("Temp")))
                         continue;
-                    }
+
                     String filePath = tempFile.getAbsolutePath();
                     String[] dirName = filePath.split("\\\\");
-                    zone = dirName[dirName.length-2];
+                    zone = dirName[dirName.length - 2];
 
                     FileInputStream inputStream = new FileInputStream(filePath);
                     XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
                     XSSFSheet sheet = workbook.getSheetAt(0);
 
                     int rows = sheet.getPhysicalNumberOfRows();
-
+                    int value = 0;
+                    String ts = "";
                     Vector<String> key = new Vector<>();
 
-                    for(int j = 1; j <= 3; j++) {
-                        for(int i = 3; i < rows; i++) {
+                    /*
+                    for (int j = 0; j < rows; j++) {
+                        for (int i = 0; i < 3; i++) {
                             XSSFCell cell = sheet.getRow(i).getCell(j);
-                            String ts = "";
-                            int value = 0;
+
                             if (cell.getCellType() == CellType.BLANK) {
                                 ts = "";
-                            }
-                            else {
+                            } else {
                                 //타입별로 내용 읽기
-                                switch (cell.getCellType()){
+                                switch (cell.getCellType()) {
                                     case FORMULA:
                                         ts = cell.getCellFormula();
                                         break;
@@ -287,35 +287,124 @@ class ExcelParser {
                                         break;
                                 }
                             }
+                        }
+                        String str = "";
+                        int cnt = 0;
 
-                            String str = "";
-                            int cnt = 0;
-
-                            for (int k = 0; k < ts.length(); k++) {
-                                if (ts.charAt(k) == ' ') {
-                                    if (cnt == 0) {
-                                        key.addElement(str);
-                                        str = "";
-                                    }
-                                    else if (cnt == 1) {
-                                        key.addElement(str);
-                                        str = "";
-                                    }
-                                    else {
-                                        value = Integer.parseInt(str);
-                                        str = "";
-                                    }
-
-                                    cnt++;
+                        for (int k = 0; k < ts.length(); k++) {
+                            if (ts.charAt(k) == ' ') {
+                                if (cnt == 0) {
+                                    key.addElement(str);
+                                    str = "";
+                                } else if (cnt == 1) {
+                                    key.addElement(str);
+                                    str = "";
+                                } else {
+                                    value = Integer.parseInt(str);
+                                    str = "";
                                 }
-                                else {
-                                    str += ts.charAt(k);
+
+                                cnt++;
+                            } else {
+                                str += ts.charAt(k);
+                            }
+                        }
+
+                        newData = new Table(key, value);
+                        vector.add(newData);
+                    }
+                    */
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void Export() {
+
+    }
+
+    /*
+    public void parsing() {
+        Vector<Table> vector = new Vector<>();
+        String zone = null;//시트명
+        Table newData;
+
+        try {
+            File dirFile = new File(projectPath + "\\src\\main\\resources\\");
+            File[] fileList = dirFile.listFiles();
+
+            for (File tempFile : fileList) {
+                if (tempFile.isFile()) {
+                    String fileName = tempFile.getName();
+                    if (!((fileName.endsWith(".xls") || fileName.endsWith(".xlsx")) && fileName.startsWith("Temp"))) {
+                        continue;
+                    }
+                    String filePath = tempFile.getAbsolutePath();
+                    String[] dirName = filePath.split("\\\\");
+                    zone = dirName[dirName.length - 2];
+
+                    FileInputStream inputStream = new FileInputStream(filePath);
+                    XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
+                    XSSFSheet sheet = workbook.getSheetAt(0);
+
+                    int rows = sheet.getPhysicalNumberOfRows();
+                    int value = 0;
+                    String ts = "";
+                    Vector<String> key = new Vector<>();
+
+                    for (int j = 0; j < rows; j++) {
+                        for (int i = 0; i < 3; i++) {
+                            XSSFCell cell = sheet.getRow(i).getCell(j);
+
+                            if (cell.getCellType() == CellType.BLANK) {
+                                ts = "";
+                            } else {
+                                //타입별로 내용 읽기
+                                switch (cell.getCellType()) {
+                                    case FORMULA:
+                                        ts = cell.getCellFormula();
+                                        break;
+                                    case NUMERIC:
+                                        ts = cell.getNumericCellValue() + " ";
+                                        break;
+                                    case STRING:
+                                        ts = cell.getStringCellValue() + " ";
+                                        break;
+                                    case BLANK:
+                                        ts = cell.getBooleanCellValue() + " ";
+                                        break;
+                                    case ERROR:
+                                        ts = cell.getErrorCellValue() + " ";
+                                        break;
                                 }
                             }
-
-                            newData = new Table(key,value);
-                            vector.add(newData);
                         }
+                        String str = "";
+                        int cnt = 0;
+
+                        for (int k = 0; k < ts.length(); k++) {
+                            if (ts.charAt(k) == ' ') {
+                                if (cnt == 0) {
+                                    key.addElement(str);
+                                    str = "";
+                                } else if (cnt == 1) {
+                                    key.addElement(str);
+                                    str = "";
+                                } else {
+                                    value = Integer.parseInt(str);
+                                    str = "";
+                                }
+
+                                cnt++;
+                            } else {
+                                str += ts.charAt(k);
+                            }
+                        }
+
+                        newData = new Table(key, value);
+                        vector.add(newData);
                     }
                 }
             }
@@ -331,7 +420,7 @@ class ExcelParser {
             XSSFRow row;
             Table d;
 
-            while(iter.hasNext()) {
+            while (iter.hasNext()) {
                 d = iter.next();
                 row = mySheet.createRow(++rowIndex);
 
@@ -345,15 +434,15 @@ class ExcelParser {
                 cell.setCellValue(d.time);
             }
 
-            FileOutputStream output = new FileOutputStream(projectPath+File.separator+"dest\\result.xls");
+            FileOutputStream output = new FileOutputStream(projectPath + File.separator + "test\\result.xlsx");
             writebook.write(output);//파일 생성
             output.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+    */
 }
-
 
 /*
 창체 안현수 1
