@@ -25,7 +25,11 @@ public class main {
 
         String subject, name;
         Integer time, full_time = 28, day = 0, period = 0;
+        ExcelParser excelParser = new ExcelParser();
 
+        excelParser.Import(time_table);
+
+        /*
         Vector<Vector<String>> tea = new Vector<Vector<String>>(28);
 
         for (int i = 0; i < full_time; i++) {
@@ -44,6 +48,7 @@ public class main {
         }
 
         System.out.println();
+        */
 
         student_table set_table = new student_table();
 
@@ -70,6 +75,8 @@ public class main {
         }
 
         System.out.println(set_table.getKnt() + " " + set_table.getCnt());
+
+        excelParser.Export();
     }
 }
 
@@ -231,7 +238,7 @@ class student_table {
 class ExcelParser {
     public static final String projectPath = System.getProperty("user.dir");
 
-    public void Import() {
+    public void Import(Multimap<Integer, Table> time_table) {
         Vector<Table> vector = new Vector<>();
         String zone = null;
         Table newData;
@@ -256,64 +263,25 @@ class ExcelParser {
                     XSSFSheet sheet = workbook.getSheetAt(0);
 
                     int rows = sheet.getPhysicalNumberOfRows();
-                    int value = 0;
-                    String ts = "";
-                    Vector<String> key = new Vector<>();
 
-                    /*
                     for (int j = 0; j < rows; j++) {
-                        for (int i = 0; i < 3; i++) {
-                            XSSFCell cell = sheet.getRow(i).getCell(j);
+                        Vector<String> key = new Vector<>();
+                        int value = 0;
 
-                            if (cell.getCellType() == CellType.BLANK) {
-                                ts = "";
-                            } else {
-                                //타입별로 내용 읽기
-                                switch (cell.getCellType()) {
-                                    case FORMULA:
-                                        ts = cell.getCellFormula();
-                                        break;
-                                    case NUMERIC:
-                                        ts = cell.getNumericCellValue() + " ";
-                                        break;
-                                    case STRING:
-                                        ts = cell.getStringCellValue() + " ";
-                                        break;
-                                    case BLANK:
-                                        ts = cell.getBooleanCellValue() + " ";
-                                        break;
-                                    case ERROR:
-                                        ts = cell.getErrorCellValue() + " ";
-                                        break;
-                                }
-                            }
-                        }
-                        String str = "";
-                        int cnt = 0;
+                        XSSFCell cell_one = sheet.getRow(j).getCell(0);
+                        XSSFCell cell_two = sheet.getRow(j).getCell(1);
+                        XSSFCell cell_three = sheet.getRow(j).getCell(2);
 
-                        for (int k = 0; k < ts.length(); k++) {
-                            if (ts.charAt(k) == ' ') {
-                                if (cnt == 0) {
-                                    key.addElement(str);
-                                    str = "";
-                                } else if (cnt == 1) {
-                                    key.addElement(str);
-                                    str = "";
-                                } else {
-                                    value = Integer.parseInt(str);
-                                    str = "";
-                                }
+                        //System.out.println(cell_one);
+                        //System.out.println(cell_two);
+                        //System.out.println(cell_three);
 
-                                cnt++;
-                            } else {
-                                str += ts.charAt(k);
-                            }
-                        }
+                        key.add(cell_one.getStringCellValue());
+                        key.add(cell_two.getStringCellValue());
+                        value = (int)cell_three.getNumericCellValue();
 
-                        newData = new Table(key, value);
-                        vector.add(newData);
+                        time_table.put(j, new Table(key, value));
                     }
-                    */
                 }
             }
         } catch (Exception e) {
@@ -322,7 +290,7 @@ class ExcelParser {
     }
 
     public void Export() {
-
+        System.out.println("정상 작동 완료.");
     }
 
     /*
