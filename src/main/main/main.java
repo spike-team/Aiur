@@ -2,16 +2,11 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import com.google.common.collect.*;
-
 import java.io.*;
-
-import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
-import static org.apache.poi.ss.usermodel.CellType.FORMULA;
 
 public class main {
     public static void main(String[] args) throws AssertionError {
@@ -23,41 +18,19 @@ public class main {
         int[] dy = {0, 0, 0, 0, 0};
         int[] arr = {7, 7, 7, 7, 6};
 
-        String subject, name;
-        Integer time, full_time = 28, day = 0, period = 0;
+        Integer full_time = 28, day = 0, period = 0;
         ExcelParser excelParser = new ExcelParser();
 
         excelParser.Import(time_table);
 
-        /*
-        Vector<Vector<String>> tea = new Vector<Vector<String>>(28);
-
-        for (int i = 0; i < full_time; i++) {
-            Vector<String> sub = new Vector<>();
-
-            subject = sc.next();
-            name = sc.next();
-            time = sc.nextInt();
-
-            sub.add(subject);
-            sub.add(name);
-
-            tea.add(sub);
-
-            time_table.put(i, new Table(tea.elementAt(i), time));
-        }
-
-        System.out.println();
-        */
-
         student_table set_table = new student_table();
 
-        Integer grade = 0, ban = 2;
+        Integer grade = 0, group = 1;
 
-        String[][][] student = new String[10][5][ban];
-        String[][][] teacher = new String[10][5][ban];
+        String[][][] student = new String[10][5][group];
+        String[][][] teacher = new String[10][5][group];
 
-        while (grade < ban) {
+        while (grade < group) {
             if
             (!set_table.createTimeTable(time_table, full_time, period, day, student, teacher, arr, grade)) {
                 grade++;
@@ -76,7 +49,7 @@ public class main {
 
         System.out.println(set_table.getKnt() + " " + set_table.getCnt());
 
-        excelParser.Export();
+        excelParser.Export(student, group);
     }
 }
 
@@ -278,7 +251,7 @@ class ExcelParser {
 
                         key.add(cell_one.getStringCellValue());
                         key.add(cell_two.getStringCellValue());
-                        value = (int)cell_three.getNumericCellValue();
+                        value = (int) cell_three.getNumericCellValue();
 
                         time_table.put(j, new Table(key, value));
                     }
@@ -289,127 +262,44 @@ class ExcelParser {
         }
     }
 
-    public void Export() {
-        System.out.println("정상 작동 완료.");
-    }
-
-    /*
-    public void parsing() {
-        Vector<Table> vector = new Vector<>();
-        String zone = null;//시트명
-        Table newData;
+    public void Export(String [][][] dataArray, int group) {
+        FileOutputStream fos = null;
 
         try {
-            File dirFile = new File(projectPath + "\\src\\main\\resources\\");
-            File[] fileList = dirFile.listFiles();
+            fos = new FileOutputStream(new File(projectPath + "\\test\\result.xlsx"));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
 
-            for (File tempFile : fileList) {
-                if (tempFile.isFile()) {
-                    String fileName = tempFile.getName();
-                    if (!((fileName.endsWith(".xls") || fileName.endsWith(".xlsx")) && fileName.startsWith("Temp"))) {
-                        continue;
-                    }
-                    String filePath = tempFile.getAbsolutePath();
-                    String[] dirName = filePath.split("\\\\");
-                    zone = dirName[dirName.length - 2];
+        XSSFWorkbook wb = new XSSFWorkbook();
+        XSSFSheet sheet = wb.createSheet("result");
 
-                    FileInputStream inputStream = new FileInputStream(filePath);
-                    XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
-                    XSSFSheet sheet = workbook.getSheetAt(0);
+        XSSFRow row = null;
+        XSSFCell cell = null;
 
-                    int rows = sheet.getPhysicalNumberOfRows();
-                    int value = 0;
-                    String ts = "";
-                    Vector<String> key = new Vector<>();
+        for (int i = 0; i < group; i++) {
+            for (int j = 0; j < dataArray.length; j++) {
+                row = sheet.createRow(j);
 
-                    for (int j = 0; j < rows; j++) {
-                        for (int i = 0; i < 3; i++) {
-                            XSSFCell cell = sheet.getRow(i).getCell(j);
-
-                            if (cell.getCellType() == CellType.BLANK) {
-                                ts = "";
-                            } else {
-                                //타입별로 내용 읽기
-                                switch (cell.getCellType()) {
-                                    case FORMULA:
-                                        ts = cell.getCellFormula();
-                                        break;
-                                    case NUMERIC:
-                                        ts = cell.getNumericCellValue() + " ";
-                                        break;
-                                    case STRING:
-                                        ts = cell.getStringCellValue() + " ";
-                                        break;
-                                    case BLANK:
-                                        ts = cell.getBooleanCellValue() + " ";
-                                        break;
-                                    case ERROR:
-                                        ts = cell.getErrorCellValue() + " ";
-                                        break;
-                                }
-                            }
-                        }
-                        String str = "";
-                        int cnt = 0;
-
-                        for (int k = 0; k < ts.length(); k++) {
-                            if (ts.charAt(k) == ' ') {
-                                if (cnt == 0) {
-                                    key.addElement(str);
-                                    str = "";
-                                } else if (cnt == 1) {
-                                    key.addElement(str);
-                                    str = "";
-                                } else {
-                                    value = Integer.parseInt(str);
-                                    str = "";
-                                }
-
-                                cnt++;
-                            } else {
-                                str += ts.charAt(k);
-                            }
-                        }
-
-                        newData = new Table(key, value);
-                        vector.add(newData);
-                    }
+                for (int k = 0; k < dataArray[j].length; k++) {
+                    cell = row.createCell(k);
+                    cell.setCellValue(dataArray[j][k][i]);
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
+
         try {
-            Iterator<Table> iter = vector.iterator();
-            XSSFWorkbook writebook = new XSSFWorkbook();//새 엑셀파일만들기
-            XSSFSheet mySheet = writebook.createSheet(zone);//새 시트 만들기 (zone이라는 이름의 시트)
-            int rowIndex = 0;
+            wb.write(fos);
 
-            XSSFRow row;
-            Table d;
-
-            while (iter.hasNext()) {
-                d = iter.next();
-                row = mySheet.createRow(++rowIndex);
-
-                XSSFCell cell = row.createCell(0);
-                cell.setCellValue(d.cource.firstElement());
-
-                cell = row.createCell(1);
-                cell.setCellValue(d.cource.lastElement());
-
-                cell = row.createCell(2);
-                cell.setCellValue(d.time);
+            if (fos != null) {
+                fos.close();
             }
-
-            FileOutputStream output = new FileOutputStream(projectPath + File.separator + "test\\result.xlsx");
-            writebook.write(output);//파일 생성
-            output.close();
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
+
+        System.out.println("정상 작동 완료.");
     }
-    */
 }
 
 /*
