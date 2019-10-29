@@ -1,7 +1,5 @@
-import java.text.SimpleDateFormat;
-import java.util.*;
-
 import com.google.common.collect.*;
+import java.util.*;
 import java.io.*;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -25,7 +23,7 @@ public class main {
 
         student_table set_table = new student_table();
 
-        Integer grade = 0, group = 1;
+        Integer grade = 0, group = 2;
 
         String[][][] student = new String[10][5][group];
         String[][][] teacher = new String[10][5][group];
@@ -99,6 +97,9 @@ class student_table {
             if (time_table_copy.size() == 0) {
                 break;
             }
+
+            if (stu[period][day] != null)
+                period++;
 
             knt++;
             pc++;
@@ -174,9 +175,6 @@ class student_table {
                 }
             }
 
-            //if (stu[period][day] != "")
-            //	period++;
-
             if (period == arr[day]) {
                 day++;
                 period = 0;
@@ -212,10 +210,6 @@ class ExcelParser {
     public static final String projectPath = System.getProperty("user.dir");
 
     public void Import(Multimap<Integer, Table> time_table) {
-        Vector<Table> vector = new Vector<>();
-        String zone = null;
-        Table newData;
-
         File dirFile = new File(projectPath + "\\src\\main\\resources\\");
         File[] fileList = dirFile.listFiles();
 
@@ -229,7 +223,6 @@ class ExcelParser {
 
                     String filePath = tempFile.getAbsolutePath();
                     String[] dirName = filePath.split("\\\\");
-                    zone = dirName[dirName.length - 2];
 
                     FileInputStream inputStream = new FileInputStream(filePath);
                     XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
@@ -244,10 +237,6 @@ class ExcelParser {
                         XSSFCell cell_one = sheet.getRow(j).getCell(0);
                         XSSFCell cell_two = sheet.getRow(j).getCell(1);
                         XSSFCell cell_three = sheet.getRow(j).getCell(2);
-
-                        //System.out.println(cell_one);
-                        //System.out.println(cell_two);
-                        //System.out.println(cell_three);
 
                         key.add(cell_one.getStringCellValue());
                         key.add(cell_two.getStringCellValue());
@@ -279,7 +268,7 @@ class ExcelParser {
 
         for (int i = 0; i < group; i++) {
             for (int j = 0; j < dataArray.length; j++) {
-                row = sheet.createRow(j);
+                row = sheet.createRow(j + (i*10));
 
                 for (int k = 0; k < dataArray[j].length; k++) {
                     cell = row.createCell(k);
@@ -301,36 +290,3 @@ class ExcelParser {
         System.out.println("정상 작동 완료.");
     }
 }
-
-/*
-창체 안현수 1
-창체 임채홍 2
-창체 안현수 1
-디비 안현수 2
-디비 안현수 1
-확통 설은선 1
-확통 설은선 1
-확통 설은선 1
-체육 장필준 1
-체육 장필준 1
-국사 서현철 1
-국사 서현철 1
-국사 서현철 1
-자바 신요셉 3
-자바 신요셉 2
-자바 신요셉 1
-논술 강래형 1
-논술 강래형 1
-네트 이경희 2
-네트 이경희 1
-영어 임채홍 1
-영어 임채홍 1
-영어 임채홍 1
-미술 강래형 1
-미술 강래형 1
-문학 장보현 1
-문학 장보현 1
-문학 장보현 1
-
-{ FULL_TIME 28, 7 7 7 7 6, 4반 }
-*/
