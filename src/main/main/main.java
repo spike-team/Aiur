@@ -38,10 +38,11 @@ public class main {
         String[][][] teacher = new String[10][5][group];
 
         while (grade < group) {
-            if
-            (!set_table.createTimeTable(time_table, reservation_Int, reservation_String, full_time, period, day, student, teacher, arr, grade)) {
+            if (!set_table.createTimeTable(time_table, reservation_Int, reservation_String, full_time, period, day, student, teacher, arr, grade)) {
                 grade++;
             }
+
+            System.out.println(set_table.getKnt() + " " + set_table.getCnt());
         }
 
         for (int i = 0; i < grade; i++) {
@@ -78,8 +79,9 @@ class Table {
 class student_table {
     private Integer cnt = 0;
     private Integer knt = 0;
+    private Integer table_cnt = 0;
 
-    public boolean createTimeTable(Multimap<Integer, Table> time_table, int[][] reservation_time, String[][] reservation_block,Integer full_time, Integer periot, Integer dat, String[][][] student, String[][][] teacher, int[] arr, Integer grade) {
+    public boolean createTimeTable(Multimap<Integer, Table> time_table, int[][] reservation_time, String[][] reservation_block, Integer full_time, Integer periot, Integer dat, String[][][] student, String[][][] teacher, int[] arr, Integer grade) {
         Multimap<Integer, Table> time_table_copy = ArrayListMultimap.create();
 
         Iterator<Integer> tableInteger = time_table.keys().iterator();
@@ -99,31 +101,14 @@ class student_table {
             stu[reservation_time[i][1]][reservation_time[i][0]] = reservation_block[i][0];
             tea[reservation_time[i][1]][reservation_time[i][0]] = reservation_block[i][1];
         }
-        /*
-        stu[0][0] = "창체";
-        tea[0][0] = "안현수";
 
-        stu[4][3] = "창체";
-        tea[4][3] = "안현수";
-
-        stu[5][3] = "창체";
-        tea[5][3] = "임채홍";
-
-        stu[6][3] = "창체";
-        tea[6][3] = "임채홍";
-        */
         Integer day = dat;
         Integer period = periot;
 
         Integer pc = 0;
         boolean overlap = false;
 
-        one:
         for (Integer i = 0; i < full_time * 50; i++) {
-            if (time_table_copy.size() == 0) {
-                break;
-            }
-
             if (stu[period][day] != null) {
                 period++;
             }
@@ -133,19 +118,27 @@ class student_table {
 
             if (pc > full_time) {
                 Iterator<Table> it = time_table_copy.values().iterator();
+                boolean check = false;
 
                 while (it.hasNext()) {
-                    if (it.hasNext()) {
-                        Table table = it.next();
 
-                        for (Integer j = 0; j <= period; j++) {
-                            if (table.cource.firstElement() != stu[j][day] && table.cource.lastElement() != tea[j][day]) {
-                                break one;
-                            }
+                    Table table = it.next();
+
+                    for (Integer j = 0; j <= period; j++) {
+                        if (!(table.cource.firstElement().equals(stu[j][day])) && !(table.cource.lastElement().equals(tea[j][day]))) {
+                            check = true;
                         }
                     }
+
+                    if (check) {
+                        cnt++;
+                        return true;
+                    }
                 }
+
+                pc = 0;
             }
+
 
             Random random = new Random();
 
@@ -169,17 +162,19 @@ class student_table {
                 number--;
             }
 
-            for (int k = 0; k <= period; k++) {
-                if (table.cource.firstElement().equals(stu[k][day])) {
+            for (int k = 0; k <= period; k++) { // 이전것과 중복이 있는가?
+                if (table.cource.firstElement().equals(stu[k][day]) || table.cource.lastElement().equals(tea[k][day])) {
                     overlap = true;
                     break;
                 }
             }
 
             for (int l = 0; l < grade; l++) {
-                if (table.cource.firstElement().equals(teacher[period][day][l])) {
-                    overlap = true;
-                    break;
+                for (int n = 0; n < arr[day]; n++) { // 7 7 7 7 6
+                    if (table.cource.lastElement().equals(teacher[n][day][l])) {
+                        overlap = true;
+                        break;
+                    }
                 }
             }
 
@@ -191,16 +186,18 @@ class student_table {
                                 String str1 = table.cource.firstElement();
                                 String str2 = table.cource.lastElement();
 
-
                                 stu[period][day] = str1;
                                 tea[period][day] = str2;
 
                                 period++;
-
                             }
 
                             time_table_copy.remove(key, table);
                             pc = 0;
+
+                            if (time_table_copy.size() == 0) {
+                                break;
+                            }
                         }
                     }
                 }
@@ -221,6 +218,8 @@ class student_table {
                 }
             }
 
+            table_cnt++;
+            System.out.println(table_cnt);
             return false;
         }
 
