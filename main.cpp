@@ -41,11 +41,14 @@ bool createTimeTable(multimap<vector<string>, int> time_table, int full_time, bo
 
 		if (pc > full_time) {
 			for (multimap<vector<string>, int>::iterator it = time_table.begin(); it != time_table.end(); it++) {
-				bool cheak = false;
+				bool check = false;
 
 				for (int i = 0; i <= period; i++)
 					if (it->first.front() != stu[i][day] && it->first.back() != tea[i][day])
-						goto TWO;
+						check = true;
+
+				if (check)
+					goto TWO;
 			}
 		}
 
@@ -56,10 +59,13 @@ bool createTimeTable(multimap<vector<string>, int> time_table, int full_time, bo
 			if (iter->first.front() == stu[i][day])
 				goto ONE;
 		
-		for (int i = 0; i < grade; i++)
-			if (iter->first.back() == teacher[period][day][i])
-				goto ONE;
-		
+		for (int i = 0; i < grade; i++) {
+			for (int j = period; j < arr[day]; j++) {
+				if (iter->first.front() == student[j][day][i] || iter->first.back() == teacher[j][day][i])
+					goto ONE;
+			}
+		}
+
 		if (!overlap) {
 			if (!(iter->second > 1 && period + iter->second > 4 && period <= 3)) {
 				if (!(period + iter->second > arr[day])) {
