@@ -27,6 +27,18 @@ bool createTimeTable(multimap<vector<string>, int> time_table, int full_time, bo
 	stu.assign(10, vector<string>(5, ""));
 	tea.assign(10, vector<string>(5, ""));
 
+	stu[0][0] = "창체";
+	tea[0][0] = "안현수";
+
+	stu[4][3] = "창체";
+	tea[4][3] = "안현수";
+
+	stu[5][3] = "창체";
+	tea[5][3] = "임채홍";
+
+	stu[6][3] = "창체";
+	tea[6][3] = "임채홍";
+
 	bool success = false;
 	
 	overlap = false;
@@ -38,6 +50,9 @@ bool createTimeTable(multimap<vector<string>, int> time_table, int full_time, bo
 	ONE: 
 		knt++;
 		pc++;
+
+		if (stu[period][day] != "")
+			period++;
 
 		if (pc > full_time) {
 			for (multimap<vector<string>, int>::iterator it = time_table.begin(); it != time_table.end(); it++) {
@@ -60,8 +75,8 @@ bool createTimeTable(multimap<vector<string>, int> time_table, int full_time, bo
 				goto ONE;
 		
 		for (int i = 0; i < grade; i++) {
-			for (int j = period; j < arr[day]; j++) {
-				if (iter->first.front() == student[j][day][i] || iter->first.back() == teacher[j][day][i])
+			for (int j = 0; j < iter->second; j++) {
+				if (iter->first.front() == student[period+j][day][i] || iter->first.back() == teacher[period+j][day][i])
 					goto ONE;
 			}
 		}
@@ -69,15 +84,17 @@ bool createTimeTable(multimap<vector<string>, int> time_table, int full_time, bo
 		if (!overlap) {
 			if (!(iter->second > 1 && period + iter->second > 4 && period <= 3)) {
 				if (!(period + iter->second > arr[day])) {
-					for (int i = 0; i < iter->second; i++) {
-						stu[period][day] = iter->first.front();
-						tea[period][day] = iter->first.back();
+					if (stu[period][day] == "" && tea[period][day] == "") {
+						for (int i = 0; i < iter->second; i++) {
+							stu[period][day] = iter->first.front();
+							tea[period][day] = iter->first.back();
 
-						period++;
+							period++;
+						}
+
+						time_table.erase(iter);
+						pc = 0;
 					}
-					
-					time_table.erase(iter);
-					pc = 0;
 				}
 			}
 		}
@@ -121,7 +138,7 @@ int main() {
 	vector<int> arr = { 7, 7, 7, 7, 6 };
 	vector<vector<vector<string>>> student, teacher;
 	string subject = "", name = "";
-	int time = 0, full_time = 28, day = 0, period = 0, grade = 0;
+	int time = 0, full_time = 25, day = 0, period = 0, grade = 0;
 	bool overlap = false;;
 
 	for (int i = 0; i < full_time; i++) {
